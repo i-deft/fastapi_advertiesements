@@ -20,7 +20,6 @@ class User(Base):
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
 
     ads = relationship("Ad", back_populates="owner")
-    drafts = relationship("Draft", back_populates="owner")
     groups = relationship('Group', secondary='user_groups', back_populates='users')
 
 
@@ -49,25 +48,10 @@ class Ad(Base):
     title = Column(String(100), index=True, nullable=True)
     body = Column(String(10000), index=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
-    state = Column(String(10), index=True)
+    state = Column(String(10))
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-
     owner = relationship("User", back_populates="ads")
-
-
-class Draft(Base):
-    __tablename__ = "drafts"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(100), index=True, nullable=True)
-    body = Column(String(10000), index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-    state = Column(String(10), index=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-
-    owner = relationship("User", back_populates="drafts")
 
 
 if __name__ == "__main__":

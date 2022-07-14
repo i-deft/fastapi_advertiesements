@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from schemas import user_schema
-from functions import user_functions
+from schemas import user_schema, ad_schema
+from functions import user_functions, ad_functions
 from db import models
 from db.database import SessionLocal, engine
 
@@ -42,17 +42,22 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-# @app.post("/users/{user_id}/news/", response_model=user_schema.News)
-# def create_item_for_user(
-#     user_id: int, news: user_schema.NewsCreate, db: Session = Depends(get_db)
-# ):
-#     return user_functions.create_user_item(db=db, news=news, user_id=user_id)
-#
+@app.post("/users/{user_id}/ads/", response_model=ad_schema.Ad)
+def create_user_ad(
+    user_id: int, ad: ad_schema.AdCreate, db: Session = Depends(get_db)
+):
+    return ad_functions.create_user_ad(db=db, ad=ad, user_id=user_id)
 
-# @app.get("/items/", response_model=list[user_schema.News])
-# def read_items(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-#     news = user_functions.get_news(db, skip=skip, limit=limit)
-#     return news
+
+@app.get("/users/{user_id}/ads/", response_model=list[ad_schema.Ad])
+def read__user_ads(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    ads = ad_functions.get_ads(db, skip=skip, limit=limit, user_id=user_id)
+    return ads
+
+@app.get("/users/{user_id}/drafts/", response_model=list[ad_schema.Ad])
+def read__user_ads(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    drafts = ad_functions.get_drafts(db, skip=skip, limit=limit, user_id=user_id)
+    return drafts
 
 @app.put("/users/{user_id}", response_model=user_schema.User)
 def update_user(user_id: int, user: user_schema.UserUpdate, db: Session = Depends(get_db)):

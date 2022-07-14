@@ -2,12 +2,11 @@ from __future__ import annotations
 
 from pydantic import BaseModel
 from .ad_schema import Ad
-from .draft_schema import Draft
+
 
 
 class UserBase(BaseModel):
     email: str
-
 
 
 class UserCreate(UserBase):
@@ -17,8 +16,6 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    news: list[Draft] = []
-    notes: list[Ad] = []
     groups: list[Group] = []
 
     class Config:
