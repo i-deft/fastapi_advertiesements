@@ -3,15 +3,15 @@ from datetime import datetime
 from pydantic import BaseModel
 
 
-class AdBase(BaseModel):
+class AdvertisementBase(BaseModel):
     title: Union[str, None] = None
     body: str
     state: str
 
-class AdCreate(AdBase):
+class AdvertisementCreate(AdvertisementBase):
     pass
 
-class Ad(AdBase):
+class Advertisement(AdvertisementBase):
     id: int
     owner_id: int
     created_at = datetime

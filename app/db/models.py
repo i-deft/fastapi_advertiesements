@@ -19,7 +19,7 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
 
-    ads = relationship("Ad", back_populates="owner")
+    advertisements = relationship("Advertisement", back_populates="owner")
     groups = relationship('Group', secondary='user_groups', back_populates='users')
 
 
@@ -41,8 +41,8 @@ class UserGroup(Base):
     group_id = Column(Integer, ForeignKey('groups.id'))
 
 
-class Ad(Base):
-    __tablename__ = "ads"
+class Advertisement(Base):
+    __tablename__ = "advertisements"
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(100), index=True, nullable=True)
@@ -51,7 +51,7 @@ class Ad(Base):
     state = Column(String(10))
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    owner = relationship("User", back_populates="ads")
+    owner = relationship("User", back_populates="advertisements")
 
 
 if __name__ == "__main__":

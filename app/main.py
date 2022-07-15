@@ -1,7 +1,7 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from schemas import user_schema, ad_schema
-from functions import user_functions, ad_functions
+from schemas import user_schema, advertisement_schema
+from functions import user_functions, advertisement_functions
 from db import models
 from db.database import SessionLocal, engine
 
@@ -42,21 +42,21 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
     return db_user
 
 
-@app.post("/users/{user_id}/ads/", response_model=ad_schema.Ad)
-def create_user_ad(
-    user_id: int, ad: ad_schema.AdCreate, db: Session = Depends(get_db)
+@app.post("/users/{user_id}/advertisements/", response_model=advertisement_schema.Advertisement)
+def create_user_advertisement(
+    user_id: int, advertisement: advertisement_schema.AdvertisementCreate, db: Session = Depends(get_db)
 ):
-    return ad_functions.create_user_ad(db=db, ad=ad, user_id=user_id)
+    return advertisement_functions.create_user_advertisement(db=db, advertisement=advertisement, user_id=user_id)
 
 
-@app.get("/users/{user_id}/ads/", response_model=list[ad_schema.Ad])
-def read__user_ads(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    ads = ad_functions.get_ads(db, skip=skip, limit=limit, user_id=user_id)
+@app.get("/users/{user_id}/advertisements/", response_model=list[advertisement_schema.Advertisement])
+def read__user_advertisements(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    ads = advertisement_functions.get_advertisements(db, skip=skip, limit=limit, user_id=user_id)
     return ads
 
-@app.get("/users/{user_id}/drafts/", response_model=list[ad_schema.Ad])
+@app.get("/users/{user_id}/drafts/", response_model=list[advertisement_schema.Advertisement])
 def read__user_ads(user_id: int, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    drafts = ad_functions.get_drafts(db, skip=skip, limit=limit, user_id=user_id)
+    drafts = advertisement_functions.get_drafts(db, skip=skip, limit=limit, user_id=user_id)
     return drafts
 
 @app.put("/users/{user_id}", response_model=user_schema.User)

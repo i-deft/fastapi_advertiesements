@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pydantic import BaseModel
-from .ad_schema import Ad
+from .advertisement_schema import Advertisement
 
 
 
@@ -17,6 +17,7 @@ class User(UserBase):
     id: int
     is_active: bool
     groups: list[Group] = []
+    advertisements: list[Advertisement] = []
 
     class Config:
         orm_mode = True
