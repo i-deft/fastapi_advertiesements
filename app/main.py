@@ -59,6 +59,14 @@ def read__user_ads(user_id: int, skip: int = 0, limit: int = 100, db: Session = 
     drafts = advertisement_functions.get_drafts(db, skip=skip, limit=limit, user_id=user_id)
     return drafts
 
+@app.post("/users/{user_id}/drafts/", response_model=advertisement_schema.Advertisement)
+def create_user_draft(
+    user_id: int, advertisement: advertisement_schema.AdvertisementCreate, db: Session = Depends(get_db)
+):
+    return advertisement_functions.create_user_draft(db=db, advertisement=advertisement, user_id=user_id)
+
+
+
 @app.put("/users/{user_id}", response_model=user_schema.User)
 def update_user(user_id: int, user: user_schema.UserUpdate, db: Session = Depends(get_db)):
     db_user = user_functions.get_user_by_email(db, email=user.email)

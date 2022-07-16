@@ -1,12 +1,12 @@
 from __future__ import annotations
-
 from pydantic import BaseModel
-from .advertisement_schema import Advertisement
+from typing import Union
 
 
 
 class UserBase(BaseModel):
     email: str
+    role: Union[str, None] = 'client'
 
 
 class UserCreate(UserBase):
@@ -17,7 +17,6 @@ class User(UserBase):
     id: int
     is_active: bool
     groups: list[Group] = []
-    advertisements: list[Advertisement] = []
 
     class Config:
         orm_mode = True
@@ -27,6 +26,7 @@ class UserUpdate(UserBase):
     password: str
     is_active: bool
     email: str
+
 
 from .group_schema import Group
 User.update_forward_refs()

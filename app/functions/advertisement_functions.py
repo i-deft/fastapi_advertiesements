@@ -3,13 +3,13 @@ from schemas import advertisement_schema
 from db import models
 
 
-
 def get_advertisements(db: Session, user_id: int, skip: int = 0, limit: int = 100):
     return db.query(models.Ad).filter_by(owner_id=user_id, state='active').offset(skip).limit(limit).all()
 
 
 def get_drafts(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return db.query(models.Ad).filter_by(owner_id=user_id, state='draft').offset(skip).limit(limit).all()
+    return db.query(models.Advertisement).filter_by(owner_id=user_id, state='draft').offset(skip).limit(limit).all()
+
 
 def create_user_advertisement(db: Session, advertisement: advertisement_schema.AdvertisementCreate, user_id: int):
     db_ad = models.Advertisement(**advertisement.dict(), owner_id=user_id)
@@ -18,4 +18,11 @@ def create_user_advertisement(db: Session, advertisement: advertisement_schema.A
     db.refresh(db_ad)
     return db_ad
 
+
+def create_user_draft(db: Session, advertisement: advertisement_schema.AdvertisementCreate, user_id: int):
+    db_ad = models.Advertisement(**advertisement.dict(), state='draft', owner_id=user_id)
+    db.add(db_ad)
+    db.commit()
+    db.refresh(db_ad)
+    return db_ad
 
