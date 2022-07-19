@@ -1,7 +1,7 @@
 from __future__ import annotations
+from datetime import datetime
 from pydantic import BaseModel
 from typing import Union
-
 
 
 class UserBase(BaseModel):
@@ -17,6 +17,8 @@ class User(UserBase):
     id: int
     is_active: bool
     groups: list[Group] = []
+    created_at: datetime
+    updated_at: Union[datetime, None] = None
 
     class Config:
         orm_mode = True
@@ -24,8 +26,7 @@ class User(UserBase):
 
 class UserUpdate(UserBase):
     password: str
-    is_active: bool
-    email: str
+    is_active: Union[bool, None] = True
 
 
 from .group_schema import Group

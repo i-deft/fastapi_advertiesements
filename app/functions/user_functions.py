@@ -23,7 +23,7 @@ def get_user_by_email(db: Session, email: str):
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).offset(skip).limit(limit).all()
+    return db.query(models.User).order_by(models.User.id).offset(skip).limit(limit).all()
 
 
 def create_user(db: Session, user: user_schema.UserCreate):
@@ -33,3 +33,16 @@ def create_user(db: Session, user: user_schema.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def update_user(db: Session, user_id: int, user_in: user_schema.UserUpdate):
+    user = get_user(db=db, user_id=user_id)
+    hashed_password = get_password_hash(user_in.password)
+    user.email = user_in.email
+    user.hashed_password = hashed_password
+    user.role = user_in.role
+    user.is_active = user_in.is_active
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
