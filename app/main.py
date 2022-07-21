@@ -4,6 +4,7 @@ from schemas import user_schema, advertisement_schema
 from functions import user_functions, advertisement_functions
 from db import models
 from db.database import SessionLocal, engine
+from fastapi.security import OAuth2PasswordRequestForm
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -119,3 +120,18 @@ def update_draft(draft_id: int, user_id: int, draft_in: advertisement_schema.Adv
         raise HTTPException(status_code=404, detail="Draft not found")
 
     return advertisement_functions.update_draft(db, db_draft=db_draft, owner_id=user_id, draft_in=draft_in)
+
+
+@app.post("/auth", response_model=user_schema.TokenBase)
+def auth(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = user_functions.get_user_by_email(db=db, email=form_data.username)
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+
+    if not user_functions.verify_password(
+        plain_password=form_data.password, hashed_password=user.hashed_password
+    ):
+        raise HTTPException(status_code=400, detail="Incorrect email or password")
+
+    return user_functions.create_user_token(db=db, user_id=user.id)

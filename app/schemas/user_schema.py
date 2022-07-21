@@ -1,11 +1,11 @@
 from __future__ import annotations
 from datetime import datetime
-from pydantic import BaseModel
-from typing import Union
+from pydantic import BaseModel, validator, UUID4, EmailStr, Field
+from typing import Union, Optional
 
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
     role: Union[str, None] = 'client'
 
 
@@ -27,6 +27,19 @@ class User(UserBase):
 class UserUpdate(UserBase):
     password: str
     is_active: Union[bool, None] = True
+
+
+class TokenBase(BaseModel):
+    token: UUID4 = Field(..., alias="access_token")
+    expires: datetime
+    token_type: Optional[str] = "bearer"
+
+    class Config:
+        allow_population_by_field_name = True
+
+    @validator("token")
+    def hexlify_token(cls, value):
+        return value.hex
 
 
 from .group_schema import Group

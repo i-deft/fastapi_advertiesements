@@ -1,12 +1,11 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
-from sqlalchemy.orm import relationship, Session
-from sqlalchemy import create_engine
-from sqlalchemy.sql import func
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, text
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
 import datetime
-# from db.database import Base
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = "users"
@@ -20,7 +19,19 @@ class User(Base):
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
 
     advertisements = relationship("Advertisement", back_populates="owner")
-    groups = relationship('Group', secondary='user_groups', back_populates='users')
+    tokens = relationship("Token", back_populates="user")
+    groups = relationship('Group', secondary='user_groups', back_populates='user')
+
+
+class Token(Base):
+    __tablename__ = "tokens"
+
+    id = Column(Integer, primary_key=True, )
+    token = Column(UUID(as_uuid=False), server_default=text("gen_random_uuid()"), unique=True, nullable=False,
+                   index=True)
+    expires = Column(DateTime)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="tokens")
 
 
 class Group(Base):
@@ -29,7 +40,7 @@ class Group(Base):
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    users = relationship('User', secondary='user_groups', back_populates='groups')
+    user = relationship('User', secondary='user_groups', back_populates='groups')
 
 
 class UserGroup(Base):
@@ -52,24 +63,3 @@ class Advertisement(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
     owner = relationship("User", back_populates="advertisements")
-
-
-if __name__ == "__main__":
-
-    SQLALCHEMY_DATABASE_URL = "postgresql://marat:1q2w3e4r5t@localhost/fastapi"
-
-    engine = create_engine(
-        SQLALCHEMY_DATABASE_URL
-    )
-
-    from datetime import datetime
-    with Session(bind=engine) as session:
-
-        # user = User(email='fgfffffffffgfgffffffff')
-        user = session.query(User).get(2)
-        user.email ='11kд1д8k;сhgпкk17'
-
-        # group = session.query(Group).get(1)
-        # user.groups = [group]
-        session.add(user)
-        session.commit()
