@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 from schemas import user_schema
 from db import models
 from passlib.context import CryptContext
+from fastapi import Depends, HTTPException, status
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -34,11 +36,6 @@ def create_user(db: Session, user: user_schema.UserCreate):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    token = create_user_token(db=db, user_id=db_user.id)
-    db.add(token)
-    db.commit()
-    db_user.token = token
-    db.refresh(token)
     return db_user
 
 def update_user(db: Session, user_id: int, user_in: user_schema.UserUpdate):
@@ -63,7 +60,7 @@ def delete_user(db: Session, user: models.User):
 
 
 def get_user_by_token(db: Session, token: str):
-    query = db.query(models.User, models.Token).filter(models.User.token == token, models.Token > datetime.now()).first()
+    query = db.query(models.User).join(models.Token).filter(models.Token.token == token, models.Token.expires > datetime.now()).first()
     return query
 
 
@@ -74,4 +71,5 @@ def create_user_token(db: Session, user_id: int):
     db.refresh(token)
     token_dict = {"token": token.token, "expires": token.expires}
     return token_dict
+
 

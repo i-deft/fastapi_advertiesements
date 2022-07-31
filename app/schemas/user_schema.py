@@ -37,6 +37,7 @@ class TokenBase(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
+
     @validator("token")
     def hexlify_token(cls, value):
         return value.hex
