@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth", auto_error=False)
 
+
 def get_db():
     db = SessionLocal()
     try:
@@ -14,7 +15,8 @@ def get_db():
         db.close()
 
 
-def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+def get_current_user(db: Session = Depends(get_db),
+                     token: str = Depends(oauth2_scheme)):
     user = get_user_by_token(db=db, token=token)
     if not user:
         raise HTTPException(
@@ -22,7 +24,6 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
             headers={"WWW-Authenticate": "Bearer"},
         )
     if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Inactive user")
     return user

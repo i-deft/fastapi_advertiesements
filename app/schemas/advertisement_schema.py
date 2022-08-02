@@ -25,5 +25,3 @@ class Advertisement(AdvertisementBase):
 
     class Config:
         orm_mode = True
-
-

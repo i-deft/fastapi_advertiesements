@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from app.schemas import user_schema
 from app.db import models
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,17 +25,21 @@ def get_user_by_email(db: Session, email: str):
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.User).order_by(models.User.id).filter_by(is_active=True).offset(skip).limit(limit).all()
+    return db.query(models.User).order_by(models.User.id).filter_by(
+        is_active=True).offset(skip).limit(limit).all()
 
 
 def create_user(db: Session, user: user_schema.UserCreate):
     hashed_password = get_password_hash(user.password)
-    db_user = models.User(email=user.email, hashed_password=hashed_password, role=user.role)
+    db_user = models.User(email=user.email,
+                          hashed_password=hashed_password,
+                          role=user.role)
 
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
 
 def update_user(db: Session, user_id: int, user_in: user_schema.UserUpdate):
     user = get_user(db=db, user_id=user_id)
@@ -60,16 +63,17 @@ def delete_user(db: Session, user: models.User):
 
 
 def get_user_by_token(db: Session, token: str):
-    query = db.query(models.User).join(models.Token).filter(models.Token.token == token, models.Token.expires > datetime.now()).first()
+    query = db.query(models.User).join(models.Token).filter(
+        models.Token.token == token,
+        models.Token.expires > datetime.now()).first()
     return query
 
 
 def create_user_token(db: Session, user_id: int):
-    token = models.Token(expires=datetime.now() + timedelta(hours=1), user_id=user_id)
+    token = models.Token(expires=datetime.now() + timedelta(hours=1),
+                         user_id=user_id)
     db.add(token)
     db.commit()
     db.refresh(token)
     token_dict = {"token": token.token, "expires": token.expires}
     return token_dict
-
-

@@ -20,14 +20,22 @@ class User(Base):
 
     advertisements = relationship("Advertisement", back_populates="owner")
     tokens = relationship("Token", back_populates="user")
-    groups = relationship('Group', secondary='user_groups', back_populates='user')
+    groups = relationship('Group',
+                          secondary='user_groups',
+                          back_populates='user')
 
 
 class Token(Base):
     __tablename__ = "tokens"
 
-    id = Column(Integer, primary_key=True, )
-    token = Column(UUID(as_uuid=False), server_default=text("gen_random_uuid()"), unique=True, nullable=False,
+    id = Column(
+        Integer,
+        primary_key=True,
+    )
+    token = Column(UUID(as_uuid=False),
+                   server_default=text("gen_random_uuid()"),
+                   unique=True,
+                   nullable=False,
                    index=True)
     expires = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -40,7 +48,9 @@ class Group(Base):
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    user = relationship('User', secondary='user_groups', back_populates='groups')
+    user = relationship('User',
+                        secondary='user_groups',
+                        back_populates='groups')
 
 
 class UserGroup(Base):

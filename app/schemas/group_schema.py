@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 from pydantic import BaseModel
 
 
@@ -19,5 +18,7 @@ class Group(GroupBase):
     class Config:
         orm_mode = True
 
+
 from .user_schema import User
+
 Group.update_forward_refs()

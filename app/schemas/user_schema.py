@@ -37,12 +37,11 @@ class TokenBase(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
-
     @validator("token")
     def hexlify_token(cls, value):
         return value.hex
 
 
 from .group_schema import Group
-User.update_forward_refs()
 
+User.update_forward_refs()
