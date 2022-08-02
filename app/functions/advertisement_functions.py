@@ -3,8 +3,8 @@ from schemas import advertisement_schema
 from db import models
 
 
-def get_advertisements(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return db.query(models.Advertisement).filter_by(owner_id=user_id, state='active').offset(skip).limit(limit).all()
+def all_advertisements(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Advertisement).order_by(models.Advertisement.created_at.desc()).offset(skip).limit(limit).all()
 
 
 def get_drafts(db: Session, user_id: int, skip: int = 0, limit: int = 100):

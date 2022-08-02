@@ -12,6 +12,14 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+
+@app.get("/", response_model=list[advertisement_schema.Advertisement])
+def read_feed(skip: int = 0, limit: int = 100,
+               db: Session = Depends(dependencies.get_db)):
+    users = advertisement_functions.all_advertisements(db, skip=skip, limit=limit)
+    return users
+
+
 @app.post("/users/", response_model=user_schema.User)
 def create_user(user: user_schema.UserCreate,
                 db: Session = Depends(dependencies.get_db),
