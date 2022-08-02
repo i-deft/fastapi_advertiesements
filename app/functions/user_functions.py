@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
-from schemas import user_schema
-from db import models
+from app.schemas import user_schema
+from app.db import models
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 

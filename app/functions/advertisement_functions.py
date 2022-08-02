@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from schemas import advertisement_schema
-from db import models
+from app.schemas import advertisement_schema
+from app.db import models
 
 
 def all_advertisements(db: Session, skip: int = 0, limit: int = 100):
