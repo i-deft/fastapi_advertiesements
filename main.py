@@ -47,7 +47,7 @@ def update_user(user_id: int,
 @app.delete("/users/{user_id}", response_model=user_schema.User)
 def delete_user(user_id: int, db: Session = Depends(dependencies.get_db)):
     db_user = user_functions.get_user(db, user_id=user_id)
-    if not db_user or db_user.is_active == False:
+    if not db_user or not db_user.is_active:
         raise HTTPException(status_code=404, detail="User not found")
     return user_functions.delete_user(db=db, user=db_user)
 
