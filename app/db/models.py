@@ -1,7 +1,7 @@
+import datetime
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
-import datetime
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()

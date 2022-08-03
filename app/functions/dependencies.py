@@ -1,8 +1,8 @@
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
-from app.db.database import SessionLocal
-from .user_functions import get_user_by_token
 from sqlalchemy.orm import Session
+from app.db.database import SessionLocal
+from app.functions.user_functions import get_user_by_token
 from app.db.models import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth", auto_error=False)
@@ -30,10 +30,6 @@ def get_current_user(db: Session = Depends(get_db),
     return user
 
 
-def get_resource_owner(db: Session = Depends(get_db)):
-    pass
-
-
 class RoleChecker:
     def __init__(self, allowed_roles: list, resource_owner: User = Depends(get_resource_owner)):
         self.allowed_roles = allowed_roles
@@ -42,7 +38,5 @@ class RoleChecker:
     def __call__(self, user: User = Depends(get_current_user)):
         if user.role not in self.allowed_roles:
             raise HTTPException(status_code=403, detail="Operation not permitted")
-        if user.role == 'moderator':
-            if user not in self.resource_owner.groups:
-                raise HTTPException(status_code=404, detail="Operation not permitted")
+
 

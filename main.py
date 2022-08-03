@@ -1,10 +1,11 @@
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.schemas import user_schema, advertisement_schema
 from app.functions import user_functions, advertisement_functions, dependencies
 from app.db import models
 from app.db.database import engine
-from fastapi.security import OAuth2PasswordRequestForm
+
 
 models.Base.metadata.create_all(bind=engine)
 

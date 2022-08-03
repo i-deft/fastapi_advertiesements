@@ -1,8 +1,9 @@
-from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 from app.schemas import user_schema
 from app.db import models
-from passlib.context import CryptContext
+
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
