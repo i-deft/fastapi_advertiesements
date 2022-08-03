@@ -31,9 +31,8 @@ def get_current_user(db: Session = Depends(get_db),
 
 
 class RoleChecker:
-    def __init__(self, allowed_roles: list, resource_owner: User = Depends(get_resource_owner)):
+    def __init__(self, allowed_roles: list):
         self.allowed_roles = allowed_roles
-        self.resource_owner = resource_owner
 
     def __call__(self, user: User = Depends(get_current_user)):
         if user.role not in self.allowed_roles:
