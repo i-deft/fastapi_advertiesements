@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from app.db.database import SessionLocal
 from app.functions.user_functions import get_user_by_token
-from app.db.models import User
+from app.db import models
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth", auto_error=False)
 
@@ -34,8 +34,7 @@ class RoleChecker:
     def __init__(self, allowed_roles: list):
         self.allowed_roles = allowed_roles
 
-    def __call__(self, user: User = Depends(get_current_user)):
+    def __call__(self, user: models.User = Depends(get_current_user)):
         if user.role not in self.allowed_roles:
             raise HTTPException(status_code=403, detail="Operation not permitted")
-
 

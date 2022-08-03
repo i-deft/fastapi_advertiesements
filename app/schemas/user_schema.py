@@ -1,6 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
-from pydantic import BaseModel, validator, UUID4, EmailStr, Field
+from pydantic import BaseModel, validator, UUID4, EmailStr, Field, root_validator
 from typing import Union, Optional
 
 
@@ -11,15 +11,23 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    groups: list[int] = []
 
+    @root_validator
+    def check_client_group(cls, values):
+        role = values.get('role')
+        groups = values.get('groups')
+        if role == 'client' and not groups:
+                raise ValueError('Client user requires binded groups')
+        return values
 
 class User(UserBase):
     id: int
     is_active: bool
-    groups: list[Group] = []
     created_at: datetime
     updated_at: Union[datetime, None] = None
-
+    role: str
+    groups: list[Group] = []
     class Config:
         orm_mode = True
 
@@ -27,7 +35,15 @@ class User(UserBase):
 class UserUpdate(UserBase):
     password: str
     is_active: Union[bool, None] = True
+    groups: list[int] = []
 
+    @root_validator
+    def check_client_group(cls, values):
+        role = values.get('role')
+        groups = values.get('group')
+        if role == 'client' and not groups:
+                raise ValueError('Client user requires binded groups')
+        return values
 
 class TokenBase(BaseModel):
     token: UUID4 = Field(..., alias="access_token")

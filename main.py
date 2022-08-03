@@ -5,6 +5,7 @@ from app.schemas import user_schema, advertisement_schema
 from app.functions import user_functions, advertisement_functions, dependencies
 from app.db import models
 from app.db.database import engine
+from app import role_permissions as rp
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -22,18 +23,19 @@ def read_feed(skip: int = 0,
     return users
 
 
-@app.post("/users/", response_model=user_schema.User)
+@app.post("/users/", response_model=user_schema.User, dependencies=[Depends(rp.allow_create_users)])
 def create_user(user: user_schema.UserCreate,
                 db: Session = Depends(dependencies.get_db),
                 current_user: models.User = Depends(
-                    dependencies.get_current_user)):
+                    dependencies.get_current_user),
+                ):
     db_user = user_functions.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=200, detail="Email already registered")
     return user_functions.create_user(db=db, user=user)
 
 
-@app.put("/users/{user_id}", response_model=user_schema.User)
+@app.put("/users/{user_id}", response_model=user_schema.User, dependencies=[Depends(rp.allow_update_users)])
 def update_user(user_id: int,
                 user_in: user_schema.UserUpdate,
                 db: Session = Depends(dependencies.get_db),
@@ -45,7 +47,7 @@ def update_user(user_id: int,
     return user_functions.update_user(db=db, user_id=user_id, user_in=user_in)
 
 
-@app.delete("/users/{user_id}", response_model=user_schema.User)
+@app.delete("/users/{user_id}", response_model=user_schema.User, dependencies=[Depends(rp.allow_delete_users)])
 def delete_user(user_id: int, db: Session = Depends(dependencies.get_db)):
     db_user = user_functions.get_user(db, user_id=user_id)
     if not db_user or not db_user.is_active:
@@ -53,13 +55,13 @@ def delete_user(user_id: int, db: Session = Depends(dependencies.get_db)):
     return user_functions.delete_user(db=db, user=db_user)
 
 
-@app.get("/users/", response_model=list[user_schema.User])
+@app.get("/users/", response_model=list[user_schema.User], dependencies=[Depends(rp.allow_view_users_list)])
 def read_users(skip: int = 0,
                limit: int = 100,
                db: Session = Depends(dependencies.get_db),
                current_user: models.User = Depends(
                    dependencies.get_current_user)):
-    users = user_functions.get_users(db, skip=skip, limit=limit)
+    users = user_functions.get_users(db=db, skip=skip, limit=limit, current_user=current_user)
     return users
 
 
@@ -77,10 +79,10 @@ def read_user(user_id: int,
 @app.post("/users/{user_id}/advertisements/",
           response_model=advertisement_schema.Advertisement)
 def create_user_advertisement(
-    user_id: int,
-    advertisement: advertisement_schema.AdvertisementCreate,
-    db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_user)):
+        user_id: int,
+        advertisement: advertisement_schema.AdvertisementCreate,
+        db: Session = Depends(dependencies.get_db),
+        current_user: models.User = Depends(dependencies.get_current_user)):
     return advertisement_functions.create_user_advertisement(
         db=db, advertisement=advertisement, user_id=user_id)
 
@@ -159,11 +161,11 @@ def read_draft(draft_id: int,
 @app.put("/users/{user_id}/advertisements/{advertisement_id}",
          response_model=advertisement_schema.Advertisement)
 def update_advertisement(
-    advertisement_id: int,
-    user_id: int,
-    advertisement_in: advertisement_schema.AdvertisementUpdate,
-    db: Session = Depends(dependencies.get_db),
-    current_user: models.User = Depends(dependencies.get_current_user)):
+        advertisement_id: int,
+        user_id: int,
+        advertisement_in: advertisement_schema.AdvertisementUpdate,
+        db: Session = Depends(dependencies.get_db),
+        current_user: models.User = Depends(dependencies.get_current_user)):
     db_advertisement = advertisement_functions.get_advertisement(
         db, advertisement_id=advertisement_id, owner_id=user_id)
     if db_advertisement is None:
