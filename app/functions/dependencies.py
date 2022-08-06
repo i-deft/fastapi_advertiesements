@@ -31,10 +31,11 @@ def get_current_user(db: Session = Depends(get_db),
 
 
 class RoleChecker:
+
     def __init__(self, allowed_roles: list):
         self.allowed_roles = allowed_roles
 
     def __call__(self, user: models.User = Depends(get_current_user)):
         if user.role not in self.allowed_roles:
-            raise HTTPException(status_code=403, detail="Operation not permitted")
-
+            raise HTTPException(status_code=403,
+                                detail="Operation not permitted")

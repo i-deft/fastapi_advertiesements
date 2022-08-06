@@ -18,8 +18,9 @@ class UserCreate(UserBase):
         role = values.get('role')
         groups = values.get('groups')
         if role == 'client' and not groups:
-                raise ValueError('Client user requires binded groups')
+            raise ValueError('Client user requires binded groups')
         return values
+
 
 class User(UserBase):
     id: int
@@ -28,6 +29,7 @@ class User(UserBase):
     updated_at: Union[datetime, None] = None
     role: str
     groups: list[Group] = []
+
     class Config:
         orm_mode = True
 
@@ -42,8 +44,9 @@ class UserUpdate(UserBase):
         role = values.get('role')
         groups = values.get('group')
         if role == 'client' and not groups:
-                raise ValueError('Client user requires binded groups')
+            raise ValueError('Client user requires binded groups')
         return values
+
 
 class TokenBase(BaseModel):
     token: UUID4 = Field(..., alias="access_token")

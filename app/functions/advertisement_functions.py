@@ -1,3 +1,4 @@
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from app.schemas import advertisement_schema
 from app.db import models
@@ -26,7 +27,15 @@ def get_draft(db: Session, draft_id: int, owner_id: int):
 
 def create_user_advertisement(
         db: Session, advertisement: advertisement_schema.AdvertisementCreate,
-        user_id: int):
+        user_id: int, current_user: models.User):
+    if user_id != current_user.id and current_user.role == 'client':
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="not found")
+    if user_id != current_user.id and current_user.role in [
+            'admin', 'moderator'
+    ]:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Operation not permitted")
     db_ad = models.Advertisement(**advertisement.dict(),
                                  owner_id=user_id,
                                  state='active')
@@ -38,10 +47,16 @@ def create_user_advertisement(
 
 def create_user_draft(db: Session,
                       draft: advertisement_schema.AdvertisementCreate,
-                      user_id: int):
+                      user_id: int, current_user: models.User):
     db_draft = models.Advertisement(**draft.dict(),
                                     owner_id=user_id,
                                     state='draft')
+    if user_id != current_user.id and current_user.role == 'client':
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="not found")
+    elif current_user.role in ['admin', 'moderator']:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                            detail="Operation not permitted")
     db.add(db_draft)
     db.commit()
     db.refresh(db_draft)

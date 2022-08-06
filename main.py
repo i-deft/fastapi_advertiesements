@@ -84,7 +84,7 @@ def create_user_advertisement(
         db: Session = Depends(dependencies.get_db),
         current_user: models.User = Depends(dependencies.get_current_user)):
     return advertisement_functions.create_user_advertisement(
-        db=db, advertisement=advertisement, user_id=user_id)
+        db=db, advertisement=advertisement, user_id=user_id, current_user=current_user)
 
 
 @app.get("/users/{user_id}/advertisements/",
@@ -126,7 +126,9 @@ def create_user_draft(user_id: int,
                           dependencies.get_current_user)):
     return advertisement_functions.create_user_draft(db=db,
                                                      draft=draft,
-                                                     user_id=user_id)
+                                                     user_id=user_id,
+                                                     current_user=current_user
+                                                     )
 
 
 @app.get("/users/{user_id}/advertisements/{advertisement_id}",

@@ -4,7 +4,6 @@ from passlib.context import CryptContext
 from app.schemas import user_schema
 from app.db import models
 
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -24,10 +23,14 @@ def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
 
 
-def get_users(db: Session, current_user: models.User, skip: int = 0, limit: int = 100):
+def get_users(db: Session,
+              current_user: models.User,
+              skip: int = 0,
+              limit: int = 100):
     if current_user.role != 'admin':
         query = db.query(models.User).join(models.User, models.Group)
-        return query.order_by(models.User.id).filter_by(is_active=True).offset(skip).limit(limit).all()
+        return query.order_by(models.User.id).filter_by(
+            is_active=True).offset(skip).limit(limit).all()
 
     return db.query(models.User).order_by(models.User.id).filter_by(
         is_active=True).offset(skip).limit(limit).all()
@@ -35,10 +38,11 @@ def get_users(db: Session, current_user: models.User, skip: int = 0, limit: int 
 
 def create_user(db: Session, user: user_schema.UserCreate):
     hashed_password = get_password_hash(user.password)
-    db_user = models.User(email=user.email,
-                          hashed_password=hashed_password,
-                          role=user.role,
-                          )
+    db_user = models.User(
+        email=user.email,
+        hashed_password=hashed_password,
+        role=user.role,
+    )
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
