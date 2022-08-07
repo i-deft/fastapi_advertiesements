@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 from app.schemas import user_schema
@@ -27,13 +28,15 @@ def get_users(db: Session,
               current_user: models.User,
               skip: int = 0,
               limit: int = 100):
-    if current_user.role != 'admin':
+    if current_user.role == 'moderator':
         query = db.query(models.User).join(models.User, models.Group)
         return query.order_by(models.User.id).filter_by(
             is_active=True).offset(skip).limit(limit).all()
-
-    return db.query(models.User).order_by(models.User.id).filter_by(
+    elif current_user.role == 'admin':
+        return db.query(models.User).order_by(models.User.id).filter_by(
         is_active=True).offset(skip).limit(limit).all()
+    else:
+        return [db.query(models.User).filter_by(id=current_user.id).first()]
 
 
 def create_user(db: Session, user: user_schema.UserCreate):
@@ -90,3 +93,15 @@ def create_user_token(db: Session, user_id: int):
     db.refresh(token)
     token_dict = {"token": token.token, "expires": token.expires}
     return token_dict
+
+
+def moderator_access(db: Session, current_user: models.User, user_id: int):
+    if current_user.role != 'moderator':
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
+                      detail="Operation not permitted")
+    user = get_user(db=db, user_id=user_id)
+    user_moderator = False
+    for group in current_user.groups:
+        if group in user.groups:
+            user_moderator = True
+    return user_moderator
