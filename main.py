@@ -77,7 +77,7 @@ def read_user(user_id: int,
 
 
 @app.post("/users/{user_id}/advertisements/",
-          response_model=advertisement_schema.Advertisement)
+          response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_create_advertisements)])
 def create_user_advertisement(
         user_id: int,
         advertisement: advertisement_schema.AdvertisementCreate,
@@ -110,15 +110,19 @@ def read_user_drafts(user_id: int,
                      db: Session = Depends(dependencies.get_db),
                      current_user: models.User = Depends(
                          dependencies.get_current_user)):
+    moderator_has_acces = user_functions.check_moderator_access(user_id=user_id, current_user=current_user)
+    if not moderator_has_acces:
+        raise HTTPException(status_code=404, detail="Drafts not found")
     drafts = advertisement_functions.get_drafts(db,
                                                 skip=skip,
                                                 limit=limit,
-                                                user_id=user_id)
+                                                user_id=user_id,
+                                                current_user=current_user)
     return drafts
 
 
 @app.post("/users/{user_id}/drafts/",
-          response_model=advertisement_schema.Advertisement)
+          response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_create_drafts)])
 def create_user_draft(user_id: int,
                       draft: advertisement_schema.AdvertisementCreate,
                       db: Session = Depends(dependencies.get_db),
@@ -161,13 +165,14 @@ def read_draft(draft_id: int,
 
 
 @app.put("/users/{user_id}/advertisements/{advertisement_id}",
-         response_model=advertisement_schema.Advertisement)
+         response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_update_advertisements)])
 def update_advertisement(
         advertisement_id: int,
         user_id: int,
         advertisement_in: advertisement_schema.AdvertisementUpdate,
         db: Session = Depends(dependencies.get_db),
         current_user: models.User = Depends(dependencies.get_current_user)):
+
     db_advertisement = advertisement_functions.get_advertisement(
         db, advertisement_id=advertisement_id, owner_id=user_id)
     if db_advertisement is None:
@@ -181,7 +186,7 @@ def update_advertisement(
 
 
 @app.put("/users/{user_id}/drafts/{draft_id}",
-         response_model=advertisement_schema.Advertisement)
+         response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_update_drafts)])
 def update_draft(draft_id: int,
                  user_id: int,
                  draft_in: advertisement_schema.AdvertisementUpdate,

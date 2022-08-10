@@ -34,7 +34,7 @@ def get_users(db: Session,
             is_active=True).offset(skip).limit(limit).all()
     elif current_user.role == 'admin':
         return db.query(models.User).order_by(models.User.id).filter_by(
-        is_active=True).offset(skip).limit(limit).all()
+            is_active=True).offset(skip).limit(limit).all()
     else:
         return [db.query(models.User).filter_by(id=current_user.id).first()]
 
@@ -95,13 +95,14 @@ def create_user_token(db: Session, user_id: int):
     return token_dict
 
 
-def moderator_access(db: Session, current_user: models.User, user_id: int):
-    if current_user.role != 'moderator':
+def check_moderator_access(db: Session, current_user: models.User,
+                           user_id: int):
+    if current_user.role == 'moderator':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                      detail="Operation not permitted")
+                            detail="Operation not permitted")
     user = get_user(db=db, user_id=user_id)
-    user_moderator = False
+    is_user_moderator = False
     for group in current_user.groups:
         if group in user.groups:
-            user_moderator = True
-    return user_moderator
+            is_user_moderator = True
+    return is_user_moderator
