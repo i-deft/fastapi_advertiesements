@@ -13,7 +13,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 
-@app.get("/", response_model=list[advertisement_schema.Advertisement])
+@app.get("/", response_model=list[advertisement_schema.AdvertisementToFeed])
 def read_feed(skip: int = 0,
               limit: int = 100,
               db: Session = Depends(dependencies.get_db)):

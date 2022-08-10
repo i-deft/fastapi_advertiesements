@@ -1,7 +1,7 @@
 from typing import Union
 from datetime import datetime
 from pydantic import BaseModel
-
+from .user_schema import UserToFeed
 
 class AdvertisementBase(BaseModel):
     title: Union[str, None] = None
@@ -25,3 +25,18 @@ class Advertisement(AdvertisementBase):
 
     class Config:
         orm_mode = True
+
+
+class AdvertisementToFeed(AdvertisementBase):
+    id: int
+    owner: UserToFeed
+    created_at: datetime
+    updated_at: Union[datetime, None] = None
+    state: str
+
+    class Config:
+        orm_mode = True
+
+
+
+

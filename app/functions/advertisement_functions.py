@@ -87,7 +87,7 @@ def update_advertisement(
         db: Session,
         advertisement_in: advertisement_schema.AdvertisementUpdate,
         owner_id: int, db_advertisement: models.Advertisement,
-        current_user: models.user):
+        current_user: models.User):
 
     if owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,

@@ -6,12 +6,12 @@ from typing import Union, Optional
 
 class UserBase(BaseModel):
     email: EmailStr
-    role: Union[str, None] = 'client'
 
 
 class UserCreate(UserBase):
     password: str
     groups: list[int] = []
+    role: Union[str, None] = 'client'
 
     @root_validator
     def check_client_group(cls, values):
@@ -37,6 +37,7 @@ class User(UserBase):
 class UserUpdate(UserBase):
     password: str
     is_active: Union[bool, None] = True
+    role: str
     groups: list[int] = []
 
     @root_validator
@@ -46,6 +47,15 @@ class UserUpdate(UserBase):
         if role == 'client' and not groups:
             raise ValueError('Client user requires binded groups')
         return values
+
+
+class UserToFeed(UserBase):
+    id: int
+    created_at: datetime
+    updated_at: Union[datetime, None] = None
+
+    class Config:
+        orm_mode = True
 
 
 class TokenBase(BaseModel):
