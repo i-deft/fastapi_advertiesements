@@ -184,6 +184,24 @@ def update_advertisement(
         owner_id=user_id,
         advertisement_in=advertisement_in)
 
+@app.delete("/users/{user_id}/advertisements/{advertisement_id}",
+         response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_delete_advertisements)])
+def update_advertisement(
+        advertisement_id: int,
+        user_id: int,
+        db: Session = Depends(dependencies.get_db),
+        current_user: models.User = Depends(dependencies.get_current_user)):
+
+    db_advertisement = advertisement_functions.get_advertisement(
+        db, advertisement_id=advertisement_id, owner_id=user_id)
+    if db_advertisement is None:
+        raise HTTPException(status_code=404, detail="Advertisement not found")
+
+    return advertisement_functions.delete_advertisement(
+        db,
+        db_advertisement=db_advertisement,
+        owner_id=user_id,
+        advertisement_id=advertisement_id)
 
 @app.put("/users/{user_id}/drafts/{draft_id}",
          response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_update_drafts)])

@@ -19,9 +19,10 @@ def get_drafts(db: Session,
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="not found")
     elif current_user.role == 'moderator':
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
-                            detail="Operation not permitted")
-
+        query = db.query(models.Advertisement).join(models.User, models.Group,
+                                                    models.Advertisement)
+        return query.order_by(
+            models.Advertisement.id).filter_by(is_active=True)
     return db.query(models.Advertisement).filter_by(
         owner_id=user_id, state='draft').offset(skip).limit(limit).all()
 
@@ -98,4 +99,29 @@ def update_advertisement(
     db.add(db_advertisement)
     db.commit()
     db.refresh(db_advertisement)
+    return db_advertisement
+
+
+def delete_advertisement(db: Session, advertisement_id: int, owner_id: int,
+                         db_advertisement: models.Advertisement,
+                         current_user: models.User):
+
+    if current_user.role == 'client' and owner_id != current_user.id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="not found")
+    elif current_user.role == 'moderator':
+        query = db.query(models.User).join(models.User,
+                                           models.Group).filter_by(id=owner_id)
+        if current_user not in query:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail="not found")
+
+    db_advertisement = get_advertisement(db=db,
+                                         advertisement_id=advertisement_id,
+                                         owner_id=owner_id)
+    db_advertisement.state = 'removed'
+    db.add(db_advertisement)
+    db.commit()
+    db.refresh(db_advertisement)
+
     return db_advertisement

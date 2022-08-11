@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 from .user_schema import UserToFeed
 
+
 class AdvertisementBase(BaseModel):
     title: Union[str, None] = None
     body: str
@@ -36,7 +37,3 @@ class AdvertisementToFeed(AdvertisementBase):
 
     class Config:
         orm_mode = True
-
-
-
-
