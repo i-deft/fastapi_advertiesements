@@ -12,7 +12,6 @@ class GroupCreate(GroupBase):
 
 class Group(GroupBase):
     id: int
-    users: list[User] = []
 
     class Config:
         orm_mode = True

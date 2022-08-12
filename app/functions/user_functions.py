@@ -46,14 +46,14 @@ def create_user(db: Session, user: user_schema.UserCreate):
         hashed_password=hashed_password,
         role=user.role,
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-
     if user.groups:
         for group_id in user.groups:
             db_group = db.query(models.Group).filter_by(id=group_id).first()
             db_user.groups.append(db_group)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+
     return db_user
 
 
@@ -64,12 +64,15 @@ def register(db: Session, user: user_schema.UserRegister):
         hashed_password=hashed_password,
         role='client',
     )
+    for group_id in user.groups:
+        db_group = db.query(models.Group).filter_by(id=group_id).first()
+        if not db_group:
+            raise HTTPException(status_code=200, detail="Group must be from the list")
+        db_user.groups.append(db_group)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    for group_id in user.groups:
-        db_group = db.query(models.Group).filter_by(id=group_id).first()
-        db_user.groups.append(db_group)
+
     return db_user
 
 

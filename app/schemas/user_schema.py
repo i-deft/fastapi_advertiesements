@@ -29,7 +29,7 @@ class UserRegister(UserBase):
 
     @validator("groups")
     def check_client_group(cls, value):
-        if len(value) > 1:
+        if len(value) != 1:
             raise ValueError('Client must be in a single group')
         return value
 
