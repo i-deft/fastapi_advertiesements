@@ -57,6 +57,22 @@ def create_user(db: Session, user: user_schema.UserCreate):
     return db_user
 
 
+def register(db: Session, user: user_schema.UserRegister):
+    hashed_password = get_password_hash(user.password)
+    db_user = models.User(
+        email=user.email,
+        hashed_password=hashed_password,
+        role='client',
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    for group_id in user.groups:
+        db_group = db.query(models.Group).filter_by(id=group_id).first()
+        db_user.groups.append(db_group)
+    return db_user
+
+
 def update_user(db: Session, user_id: int, user_in: user_schema.UserUpdate):
     user = get_user(db=db, user_id=user_id)
     hashed_password = get_password_hash(user_in.password)

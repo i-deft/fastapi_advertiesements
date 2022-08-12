@@ -22,6 +22,18 @@ class UserCreate(UserBase):
         return values
 
 
+class UserRegister(UserBase):
+    password: str
+    groups: list[int]
+    role: Union[str, None] = 'client'
+
+    @validator("groups")
+    def check_client_group(cls, value):
+        if len(value) > 1:
+            raise ValueError('Client must be in a single group')
+        return value
+
+
 class User(UserBase):
     id: int
     is_active: bool
@@ -66,7 +78,7 @@ class TokenBase(BaseModel):
     class Config:
         allow_population_by_field_name = True
 
-    @validator("token")
+    @validator('token')
     def hexlify_token(cls, value):
         return value.hex
 

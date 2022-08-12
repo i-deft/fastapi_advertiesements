@@ -35,6 +35,16 @@ def create_user(user: user_schema.UserCreate,
     return user_functions.create_user(db=db, user=user)
 
 
+@app.post("/register", response_model=user_schema.User)
+def create_user(user: user_schema.UserRegister,
+                db: Session = Depends(dependencies.get_db),
+                ):
+    db_user = user_functions.get_user_by_email(db, email=user.email)
+    if db_user:
+        raise HTTPException(status_code=200, detail="Email already registered")
+    return user_functions.register(db=db, user=user)
+
+
 @app.put("/users/{user_id}", response_model=user_schema.User, dependencies=[Depends(rp.allow_update_users)])
 def update_user(user_id: int,
                 user_in: user_schema.UserUpdate,
@@ -221,6 +231,26 @@ def update_draft(draft_id: int,
                                                 db_draft=db_draft,
                                                 owner_id=user_id,
                                                 draft_in=draft_in)
+
+
+@app.delete("/users/{user_id}/drafts/{draft_id}",
+         response_model=advertisement_schema.Advertisement, dependencies=[Depends(rp.allow_delete_advertisements)])
+def update_advertisement(
+        draft_id: int,
+        user_id: int,
+        db: Session = Depends(dependencies.get_db),
+        current_user: models.User = Depends(dependencies.get_current_user)):
+
+    db_draft = advertisement_functions.get_draft(
+        db, draft_id=draft_id, owner_id=user_id)
+    if db_draft is None:
+        raise HTTPException(status_code=404, detail="Draft not found")
+
+    return advertisement_functions.delete_advertisement(
+        db,
+        db_advertisement=db_draft,
+        owner_id=user_id,
+        advertisement_id=draft_id)
 
 
 @app.post("/auth", response_model=user_schema.TokenBase)
