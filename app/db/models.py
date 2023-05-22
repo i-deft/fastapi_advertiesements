@@ -1,8 +1,8 @@
 import datetime
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, text
 from sqlalchemy.orm import relationship
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
+import uuid
 
 Base = declarative_base()
 
@@ -20,9 +20,7 @@ class User(Base):
 
     advertisements = relationship("Advertisement", back_populates="owner")
     tokens = relationship("Token", back_populates="user")
-    groups = relationship('Group',
-                          secondary='user_groups',
-                          back_populates='user')
+    groups = relationship("Group", secondary="user_groups", back_populates="user")
 
 
 class Token(Base):
@@ -32,11 +30,13 @@ class Token(Base):
         Integer,
         primary_key=True,
     )
-    token = Column(UUID(as_uuid=False),
-                   server_default=text("gen_random_uuid()"),
-                   unique=True,
-                   nullable=False,
-                   index=True)
+    token = Column(
+        String,
+        server_default=str(uuid.uuid4()),
+        unique=True,
+        nullable=False,
+        index=True,
+    )
     expires = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="tokens")
@@ -48,9 +48,7 @@ class Group(Base):
     id = Column(Integer, primary_key=True, index=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, onupdate=datetime.datetime.utcnow)
-    user = relationship('User',
-                        secondary='user_groups',
-                        back_populates='groups')
+    user = relationship("User", secondary="user_groups", back_populates="groups")
 
 
 class UserGroup(Base):
@@ -58,8 +56,8 @@ class UserGroup(Base):
 
     id = Column(Integer, primary_key=True)
     notes = Column(String, nullable=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    group_id = Column(Integer, ForeignKey('groups.id'))
+    user_id = Column(Integer, ForeignKey("users.id"))
+    group_id = Column(Integer, ForeignKey("groups.id"))
 
 
 class Advertisement(Base):
